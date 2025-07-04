@@ -1,0 +1,22 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Config files
+config/apple_config_files
+/config/configs.env
+/config/config_file.go
+
+# Enviroment files
+envs/
+main
+.idea
+pgdata
+vendor
+logs/all.log
