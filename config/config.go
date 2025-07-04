@@ -5,27 +5,29 @@ import (
 	"sync"
 
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	IsDebug *bool `yaml:"is_debug"`
-	Listen  struct {
-		Type   string `yaml:"type"`
-		BindIP string `yaml:"bind_ip"`
-		Port   string `yaml:"port"`
-	} `yaml:"listen"`
+	IP string `envconfig:"APP_IP" default:"0.0.0.0"`
+	Port string `envconfig:"APP_PORT" default:"8080"`
 }
 
 var instance *Config
 var once sync.Once
 
 func GetConfig() *Config {
-	once.Do(func() {
-		instance = &Config{}
-		if err := cleanenv.ReadConfig("config/config.yml", instance); err != nil{
-			help, _ := cleanenv.GetDescription(instance, nil)
-			log.Fatal(help)
-		}
-	})
-	return instance
+    once.Do(func() {
+        err := godotenv.Load(".env")
+        if err != nil {
+            log.Println("Warning: .env file not found or failed to load, using system env variables")
+        }
+
+        instance = &Config{}
+        if err := cleanenv.ReadEnv(instance); err != nil {
+            help, _ := cleanenv.GetDescription(instance, nil)
+            log.Fatalf("Error reading env: %v\n%s", err, help)
+        }
+    })
+    return instance
 }

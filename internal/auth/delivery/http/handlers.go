@@ -2,10 +2,8 @@ package http
 
 import (
 	"Medods/internal/auth"
-	"Medods/internal/auth/dto"
 	"Medods/pkg/logging"
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,7 +13,6 @@ type authHandlers struct {
 	logger logging.Logger
 }
 
-// CreateTokens implements auth.Handlers.
 func (h *authHandlers) CreateTokens() echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		user_id := ctx.Param("user_id")
@@ -29,48 +26,19 @@ func (h *authHandlers) CreateTokens() echo.HandlerFunc {
 	}
 }
 
-// GetUserIDByToken implements auth.Handlers.
 func (h *authHandlers) GetUserIDByToken() echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-        authHeader := ctx.Request().Header.Get("Authorization")
-        if authHeader == "" {
-            return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find token")
-        }
-
-        tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-        tokenString = strings.TrimSpace(tokenString)
-        if tokenString == "" {
-            return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find token")
-        }
-
-		userID, err := h.authUC.GetUserID(ctx.Request().Context(), tokenString)
-		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, "Could not find user for this token")
-		}
-		return ctx.JSON(http.StatusCreated, userID)
+		userID := ctx.Get("user_id").(string)
+		return ctx.JSON(http.StatusOK, userID)
 	}
 }
 
-// RefreshTokens implements auth.Handlers.
 func (h *authHandlers) RefreshTokens() echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		req := new(dto.RefreshTokenRequest)
-		ctx.Bind(req)
-		userAgent := ctx.Request().UserAgent()
-		userIP := ctx.RealIP()
-		refToken := req.RefreshToken
-
-		authHeader := ctx.Request().Header.Get("Authorization")
-        if authHeader == "" {
-            return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find token")
-        }
-
-        tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-        tokenString = strings.TrimSpace(tokenString)
-        if tokenString == "" {
-            return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find token")
-        }
-
+		userAgent := ctx.Get("userAgent").(string)
+		userIP := ctx.Get("userIP").(string)
+		refToken := ctx.Get("refToken").(string)
+		tokenString := ctx.Get("user_id").(string)
 		pairTokens, err := h.authUC.RefreshToken(ctx.Request().Context(), refToken, tokenString, userAgent, userIP)
 		if err != nil {
 			return ctx.JSON(http.StatusInternalServerError, "Could not refresh tokens")
@@ -79,20 +47,9 @@ func (h *authHandlers) RefreshTokens() echo.HandlerFunc {
 	}
 }
 
-// UserLogout implements auth.Handlers.
 func (h *authHandlers) UserLogout() echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-        authHeader := ctx.Request().Header.Get("Authorization")
-        if authHeader == "" {
-            return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find token")
-        }
-
-        tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-        tokenString = strings.TrimSpace(tokenString)
-        if tokenString == "" {
-            return echo.NewHTTPError(http.StatusUnauthorized, "Failed to find token")
-        }
-
+		tokenString := ctx.Get("user_id").(string)
 		err := h.authUC.DeleteRefreshToken(ctx.Request().Context(), tokenString)
 		if err != nil {
 			return ctx.JSON(http.StatusInternalServerError, "Could not logout with this token")
