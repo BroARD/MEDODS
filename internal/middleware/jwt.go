@@ -3,7 +3,6 @@ package middleware
 import (
 	"Medods/internal/auth/dto"
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -64,7 +63,6 @@ func (mw *MiddlewareManager) validateJWTToken(ctx echo.Context) bool{
 	})
 
     if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println("test")
 		userID := claims["sub"].(string)
 		if err:= mw.checkSession(userID, ctx.Request().Context()); err != nil {
 			return false

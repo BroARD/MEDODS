@@ -1,0 +1,145 @@
+basePath: /api
+definitions:
+  dto.ErrorResponse:
+    properties:
+      code:
+        description: Код ошибки
+        type: integer
+      message:
+        description: Описание ошибки
+        type: string
+    type: object
+  dto.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  dto.TokensPair:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: JWT API
+  version: "1.0"
+paths:
+  /logout:
+    post:
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Logout completed!
+          schema:
+            type: string
+        "401":
+          description: 'Неавторизован: отсутствует или неверный токен'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера при выходе
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Выход пользователя (удаление refresh токена)
+      tags:
+      - JWTTokens
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Refresh токен
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пара токенов успешно обновлена
+          schema:
+            $ref: '#/definitions/dto.TokensPair'
+        "400":
+          description: Неверный запрос (например, отсутствует refresh токен)
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: 'Неавторизован: неверный или просроченный refresh токен'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера при обновлении токенов
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Обновить пару токенов по refresh токену
+      tags:
+      - JWTTokens
+  /tokens:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Возвращает user_id, связанный с access токеном
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: 'Неавторизован: отсутствует или неверный токен'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить user_id по access токену
+      tags:
+      - JWTTokens
+  /tokens/{user_id}:
+    post:
+      description: Создаёт пару токенов для пользователя с указанным user_id
+      operationId: create-tokens
+      parameters:
+      - description: user_id
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пара токенов успешно создана
+          schema:
+            $ref: '#/definitions/dto.TokensPair'
+        "400":
+          description: Неверный запрос (например, отсутствует user_id)
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера при создании токенов
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Создать пару токенов (access и refresh) по user_id
+      tags:
+      - JWTTokens
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

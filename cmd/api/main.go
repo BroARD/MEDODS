@@ -7,8 +7,20 @@ import (
 	"Medods/pkg/logging"
 	"log"
 
+	_ "Medods/docs"
 	"github.com/sirupsen/logrus"
 )
+
+// @title JWT API
+// @version 1.0
+
+// @host localhost:8080
+// @BasePath /api
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 
 func main() {
 	cfg := config.GetConfig()

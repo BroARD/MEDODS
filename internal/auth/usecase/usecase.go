@@ -29,6 +29,7 @@ type authUseCase struct {
 }
 
 func (u *authUseCase) GetTokenByUserID(ctx context.Context, user_id string) (models.RefreshToken, error) {
+	u.logger.Info("Получение токена по UserID")
 	return u.repo.GetRefreshTokenByUserID(ctx, user_id)
 }
 

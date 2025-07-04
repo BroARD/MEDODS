@@ -13,3 +13,8 @@ type contextKey string
 
 const UserIDKey = contextKey("user_id")
 
+type ErrorResponse struct {
+    Code    int    `json:"code"`    // Код ошибки
+    Message string `json:"message"` // Описание ошибки
+}
+
