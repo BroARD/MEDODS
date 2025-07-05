@@ -25,6 +25,8 @@ git clone https://github.com/BroARD/MEDODS.git
 
 cd /MEDODS
 
+docker-compose -f docker-compose.yml up -d
+
 2.Проверьте значения в .env (по умолчанию уже настроены).
 
 3.Запустите сервис:
