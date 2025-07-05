@@ -62,9 +62,9 @@ func (mw *MiddlewareManager) validateJWTToken(ctx echo.Context) bool{
         return secretKey, nil
 	})
 
-    if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+    if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid{
 		userID := claims["sub"].(string)
-		if err:= mw.checkSession(userID, ctx.Request().Context()); err != nil {
+		if err := mw.checkSession(userID, ctx.Request().Context()); err != nil {
 			return false
 		}
 		ctx.Set("user_id", userID)

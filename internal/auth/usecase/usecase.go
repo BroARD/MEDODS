@@ -29,11 +29,14 @@ type authUseCase struct {
 }
 
 func (u *authUseCase) GetTokenByUserID(ctx context.Context, user_id string) (models.RefreshToken, error) {
+	u.logger.Info("Запуск получения Refresh токена по UserID")
 	// Получения Refresh токена по UserID из БД
 	return u.repo.GetRefreshTokenByUserID(ctx, user_id)
 }
 
 func (u *authUseCase) CreateTokens(ctx context.Context, user_id string, userAgent string, user_ip string) (dto.TokensPair, error) {
+	u.logger.Info("Запуск создания пары токенов")
+
 	// Генерация нового Refresh токена
 	newRefToken := make([]byte, LenOfToken)
 	if _, err := rand.Read(newRefToken); err != nil {
@@ -66,6 +69,7 @@ func (u *authUseCase) CreateTokens(ctx context.Context, user_id string, userAgen
 
 	// Проверка существования токена(удаление по наличии)
 	if u.checkTokenExistence(ctx, user_id) {
+		u.logger.Info("Обнаружена существующая пара токенов, удаление")
 		u.repo.DeleteRefreshTokenByUserID(ctx, user_id)
 	}
 	
@@ -85,6 +89,7 @@ func (u *authUseCase) CreateTokens(ctx context.Context, user_id string, userAgen
 }
 
 func (u *authUseCase) DeleteRefreshToken(ctx context.Context, accessToken string) error {
+	u.logger.Info("Запуск удаления Refresh токена")
 	// Получения UserID из context
 	user_id := ctx.Value(dto.UserIDKey).(string)
 
@@ -98,6 +103,8 @@ func (u *authUseCase) DeleteRefreshToken(ctx context.Context, accessToken string
 }
 
 func (u *authUseCase) RefreshToken(ctx context.Context, refToken string, accessToken string, userAgent string, user_ip string) (dto.TokensPair, error) {	
+	u.logger.Info("Запуск обновления пары токенов")
+	
 	refTokenBase64, err := base64.URLEncoding.DecodeString(refToken)
 	if err != nil {
 		u.logger.Info("RefreshToken: Ошибка декодирования Refresh Token")
